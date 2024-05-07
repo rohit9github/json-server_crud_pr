@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import Table from 'react-bootstrap/Table';
 
 
 function Home() {
 
     let [data, setData] = useState({});
+    let [users, setUsers] = useState([]);
 
     let getValue = (e) => {
         let name = e.target.name;
@@ -28,6 +30,53 @@ function Home() {
             .catch(() => {
                 alert("something wrong")
             })
+    }
+
+    useEffect(() => {
+        getData()
+    }, [setUsers]);
+
+    let getData = () => {
+        fetch("http://localhost:3000/data", {
+            method: "GET"
+        }).then(async (res) => {
+            let arr = await res.json();
+            console.log(arr);
+            setUsers(arr);
+        })
+    }
+
+    let deleteUser = (id) => {
+
+        //    ( /// *** FIRST METHOD *** /// )   //
+
+        // let pos = users.findIndex((v, i) => v.id == id);
+        // console.log(pos)
+        // if (pos != -1) {
+        //     fetch(`http://localhost:3000/data/${id}`,{
+        //         method:"DELETE"
+        //     }).then((res)=>{
+        //         return getData();
+        //     })
+        // }
+
+        // ( /// *** SECOND METHOD *** ///) 
+
+        fetch(`http://localhost:3000/data/${id}`, {
+            method: "DELETE"
+        }).then(async (res) => {
+            return getData();
+        })
+    }
+
+
+    let updateUser = (id) => {
+        fetch(`http://localhost:3000/data/${id}`,{
+            method:"PUT",
+            body:JSON.stringify(users)
+        }).then(()=>{
+            
+        })
     }
 
     return (
@@ -53,6 +102,40 @@ function Home() {
                         </Form>
                     </Col>
                 </Row>
+
+            <br/><br/><br/><br/><br/>
+
+
+                <Table striped bordered hover>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>UserName</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Delete</th>
+                            <th>Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map((v, i) => {
+                            return (
+                                <tr key={i}>
+                                    <td>{++i}</td>
+                                    <td>{v.userName}</td>
+                                    <td>{v.mail}</td>
+                                    <td>{v.pass}</td>
+                                    <td>
+                                        <Button type='button' onClick={() => deleteUser(v.id)} variant="danger">Delete</Button>
+                                    </td>
+                                    <td>
+                                        <Button variant="primary" type='button' onClick={() => updateUser(v.id)}>Update</Button>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </Table>
             </Container>
 
         </>
