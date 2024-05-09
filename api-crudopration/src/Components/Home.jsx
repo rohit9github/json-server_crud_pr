@@ -12,6 +12,7 @@ function Home() {
 
     let [data, setData] = useState({});
     let [users, setUsers] = useState([]);
+    let [id, setId] = useState(0);
 
     let getValue = (e) => {
         let name = e.target.name;
@@ -20,16 +21,33 @@ function Home() {
     }
     let submitData = (e) => {
         e.preventDefault()
-        fetch("http://localhost:3000/data", {
-            method: "POST",
-            body: JSON.stringify(data)
-        }).then(() => {
-            alert("data added")
-            setData({})
-        })
-            .catch(() => {
-                alert("something wrong")
+        if (id === 0) {
+            fetch("http://localhost:3000/data", {
+                method: "POST",
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("data added")
+                setData({})
             })
+                .catch(() => {
+                    alert("something wrong")
+                })
+        }
+        else {
+            fetch(`http://localhost:3000/data/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("data updated")
+                setData({})
+                setId(0)
+                
+            })
+                .catch(() => {
+                    alert("something wrong")
+                })
+        }
+        window.location.reload();
     }
 
     useEffect(() => {
@@ -71,12 +89,12 @@ function Home() {
 
 
     let updateUser = (id) => {
-        fetch(`http://localhost:3000/data/${id}`,{
-            method:"PUT",
-            body:JSON.stringify(users)
-        }).then(()=>{
-            
-        })
+        let editUser = users.find((v, i) => v.id === id);
+        setData(editUser);
+        setId(id);
+
+
+
     }
 
     return (
@@ -88,22 +106,22 @@ function Home() {
                         <Form method="post" onSubmit={(e) => submitData(e)}>
                             <Form.Group className="mb-3" controlId="formGroupName">
                                 <Form.Label>UserName</Form.Label>
-                                <Form.Control type="text" name="userName" value={data.userName?data.userName:""} placeholder="Enter UserName" onChange={(e) => getValue(e)} />
+                                <Form.Control type="text" name="userName" value={data.userName ? data.userName : ""} placeholder="Enter UserName" onChange={(e) => getValue(e)} />
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formGroupEmail">
                                 <Form.Label>Email address</Form.Label>
-                                <Form.Control type="email" name="mail" value={data.mail?data.mail:""} placeholder="Enter email" onChange={(e) => getValue(e)} />
+                                <Form.Control type="email" name="mail" value={data.mail ? data.mail : ""} placeholder="Enter email" onChange={(e) => getValue(e)} />
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="formGroupPassword">
                                 <Form.Label>Password</Form.Label>
-                                <Form.Control type="password" name="pass" value={data.pass?data.pass:""} placeholder="Password" onChange={(e) => getValue(e)} />
+                                <Form.Control type="password" name="pass" value={data.pass ? data.pass : ""} placeholder="Password" onChange={(e) => getValue(e)} />
                             </Form.Group>
-                            <Button variant="primary" type="submit">Submit</Button>
+                            <Button variant="primary" type="submit">{id == 0 ? "submit" : "update"}</Button>
                         </Form>
                     </Col>
                 </Row>
 
-            <br/><br/><br/><br/><br/>
+                <br /><br /><br /><br /><br />
 
 
                 <Table striped bordered hover>
